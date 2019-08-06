@@ -3,7 +3,7 @@ const db = require('./data/db');
 
 const server = express();
 
-server.unsubscribe(express.json());
+server.use(express.json());
 
 server.get('/', (req, res) => {
     res.send('Node.js and Express');
@@ -15,7 +15,7 @@ server.get('/users', async (req, res) => {
         res.status(200).json(users);
     } catch (error) {
         console.log(error);
-        res.status(500).json(error);
+        res.status(500).json({ message: 'The users informatio could not be retrieved' });
     }
 });
 
@@ -25,7 +25,7 @@ server.get('/users/:id', async (req, res) => {
         if (users) {
             res.status(200).json(users);
         } else {
-            res.status(404).json({ message: 'Could not find this user' });
+            res.status(404).json({ message: 'The user with the specified ID does not exist' });
         }
     } catch (error) {
         console.log(error);
@@ -50,18 +50,22 @@ server.put('/users/:id', async (req, res) => {
 server.post('/users', async (req, res) => {
     try {
         const users = await db.insert(req.body);
-        res.status(200).json(users);
+        if (users) {
+            res.status(201).json(users);
+        } else {
+            res.status(400).json({ message: 'Please provide name and bio for user.' })
+        }
     } catch (error) {
         console.log(error);
-        res.status(500).json(error);
+        res.status(500).json({ message: 'There was an error while saving the user to the database' });
     }
 });
 
 server.delete('/user/:id', async (req, res) => {
     try {
         const count = await db.remove(req.params.id);
-        if (users) {
-            res.status(200).json({ message: 'User was successfully deleted' });
+        if (count > 0) {
+            res.status(201).json({ message: 'User was successfully deleted' });
         } else {
             res.status(404).json({ message: 'This user could not be found' });
         }
