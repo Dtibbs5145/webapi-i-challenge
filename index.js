@@ -61,7 +61,7 @@ server.post('/users', async (req, res) => {
     }
 });
 
-server.delete('/user/:id', async (req, res) => {
+server.delete('/users/:id', async (req, res) => {
     try {
         const count = await db.remove(req.params.id);
         if (count > 0) {
